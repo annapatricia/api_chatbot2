@@ -119,7 +119,7 @@ class Pergunta(BaseModel):
 
 @app.get("/")
 def home():
-    return {"mensagem": "API Chatbot Itaú com Guardrails ativa"}
+    return {"mensagem": "API Chatbot Itaú com Guardrails ativa 111"}
 
 @app.post("/chat")
 def chat(pergunta: Pergunta):
