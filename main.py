@@ -1,8 +1,24 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import re
+#pagina
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Chatbot Itaú com Guardrails (sem LLM)")
+# Serve arquivos estáticos (a página do chat)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# CORS (ajuda se no futuro você hospedar o front separado em Vercel/Netlify)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # depois você pode trocar para sua URL do front
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # =========================
 # [1] INPUT GUARDRAIL
@@ -117,9 +133,17 @@ class Pergunta(BaseModel):
 # ENDPOINTS
 # =========================
 
+#render
 @app.get("/")
 def home():
     return {"mensagem": "API Chatbot Itaú com Guardrails ativa 111"}
+
+#pagina
+@app.get("/")
+def home():
+    return FileResponse("static/index.html")
+
+
 
 @app.post("/chat")
 def chat(pergunta: Pergunta):
