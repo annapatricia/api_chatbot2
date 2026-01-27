@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chatbot Itaú (Guardrails)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f6f7fb; }
+    .wrap { max-width: 820px; margin: 0 auto; padding: 16px; }
+    .card { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.06); }
+    h1 { font-size: 18px; margin: 0 0 12px; }
+    .chat { height: 60vh; overflow: auto; border: 1px solid #e7e7ef; border-radius: 12px; padding: 12px; background: #fafbff; }
+    .msg { margin: 10px 0; display: flex; gap: 10px; align-items: flex-start; }
+    .badge { min-width: 72px; font-weight: 700; font-size: 12px; padding: 6px 10px; border-radius: 999px; text-align: center; }
+    .user { background: #e7f0ff; color: #114a9f; }
+    .bot  { background: #e9f9ee; color: #1f6b3a; }
+    .bubble { background: #fff; border: 1px solid #ececf4; border-radius: 12px; padding: 10px 12px; flex: 1; white-space: pre-wrap; }
+    .row { display: flex; gap: 10px; margin-top: 12px; }
+    input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #d9d9e6; outline: none; }
+    button { padding: 12px 14px; border: 0; border-radius: 12px; cursor: pointer; font-weight: 700; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .hint { font-size: 12px; color: #6b7280; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Chatbot Itaú (Guardrails)</h1>
+
+      <div id="chat" class="chat"></div>
+
+      <div class="row">
+        <input id="input" placeholder="Digite sua mensagem..." autocomplete="off" />
+        <button id="send">Enviar</button>
+      </div>
+
+      <div class="hint">
+        Dica: esta página chama <code>POST /chat</code> na mesma URL do Render.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const chatEl = document.getElementById("chat");
+    const inputEl = document.getElementById("input");
+    const sendBtn = document.getElementById("send");
+
+    function addMessage(who, text) {
+      const msg = document.createElement("div");
+      msg.className = "msg";
+
+      const badge = document.createElement("div");
+      badge.className = "badge " + (who === "Você" ? "user" : "bot");
+      badge.textContent = who;
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = text;
+
+      msg.appendChild(badge);
+      msg.appendChild(bubble);
+
+      chatEl.appendChild(msg);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      addMessage("Você", text);
+      inputEl.value = "";
+      sendBtn.disabled = true;
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mensagem: text })
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          addMessage("Bot", "Erro HTTP " + res.status + ": " + errText);
+          return;
+        }
+
+        const data = await res.json();
+        addMessage("Bot", data.resposta ?? "(sem resposta)");
+      } catch (e) {
+        addMessage("Bot", "Falha ao chamar a API: " + (e?.message || e));
+      } finally {
+        sendBtn.disabled = false;
+        inputEl.focus();
+      }
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    // mensagem inicial
+    addMessage("Bot", "Olá! Faça uma pergunta sobre produtos/serviços (Pix, contas, etc.).");
+    inputEl.focus();
+  </script>
+</body>
+</html>
