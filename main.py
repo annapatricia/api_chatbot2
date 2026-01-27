@@ -134,9 +134,9 @@ class Pergunta(BaseModel):
 # =========================
 
 #render
-@app.get("/")
-def home():
-    return {"mensagem": "API Chatbot Itaú com Guardrails ativa 111"}
+#@app.get("/")
+#def home():
+    #return {"mensagem": "API Chatbot Itaú com Guardrails ativa 111"}
 
 #pagina
 @app.get("/")
