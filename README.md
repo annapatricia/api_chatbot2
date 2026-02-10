@@ -57,17 +57,4 @@ ap_chatbot2/
 │   └── index.html       # Interface simples do chatbot
 └── README.md
 
-🛠 Tecnologias Utilizadas
-
-Python 3
-
-FastAPI
-
-Pydantic
-
-Regex (análise de intenção)
-
-HTML/CSS (front-end simples)
-
-Render (deploy)
 
